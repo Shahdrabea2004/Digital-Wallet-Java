@@ -1,8 +1,8 @@
 package com.example.wallet.account;
 
+import com.example.wallet.common.AmountValidator;
 import com.example.wallet.exception.InsufficientBalanceException;
 import com.example.wallet.exception.InvalidAccountStateException;
-import com.example.wallet.exception.InvalidAmountException;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -28,18 +28,15 @@ public class Account {
 
     public void deposit(BigDecimal amount) {
         // TODO: validate the amount and account state, then update the balance.
-        if (amount == null || amount.signum() <= 0) {
-            throw new InvalidAmountException("Amount must be greater than zero");
-        }
+        validateAmountAndStatus(amount);
         // TODO: update the balance after validation.
         // Intentionally incomplete for the challenge.
+        balance = balance.add(amount);
     }
 
     public void withdraw(BigDecimal amount) {
         // TODO: validate account state and ensure sufficient balance.
-        if (amount == null || amount.signum() <= 0) {
-            throw new InvalidAmountException("Amount must be greater than zero");
-        }
+        validateAmountAndStatus(amount);
         if (balance.compareTo(amount) < 0) {
             throw new InsufficientBalanceException("Insufficient balance");
         }
@@ -52,6 +49,12 @@ public class Account {
 
     public void close() {
         // TODO: decide which business rule should apply before closing.
+        if (status == AccountStatus.CLOSED) {
+            throw new InvalidAccountStateException("Account is already  closed");
+        }
+        if (balance.compareTo(BigDecimal.ZERO) != 0) {
+            throw new InvalidAccountStateException("Account cannot be closed while balance is not zero");
+        }
         status = AccountStatus.CLOSED;
     }
 
@@ -59,5 +62,10 @@ public class Account {
         if (status != AccountStatus.ACTIVE) {
             throw new InvalidAccountStateException("Account is not active");
         }
+    }
+
+    private void validateAmountAndStatus(BigDecimal amount) {
+        AmountValidator.validate(amount);
+        ensureActive();
     }
 }
