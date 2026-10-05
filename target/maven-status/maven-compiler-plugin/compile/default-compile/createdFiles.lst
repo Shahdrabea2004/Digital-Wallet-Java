@@ -1,0 +1,3 @@
+com\example\wallet\transaction\TransactionService.class
+com\example\wallet\transaction\Transaction.class
+com\example\wallet\transfer\TransferService.class
